@@ -2,8 +2,12 @@ name: Automatizacion_AppMendozaSolYVino
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    # Intervalo mínimo soportado oficialmente por GitHub Actions (cada 5 minutos)
+    - cron: '*/5 * * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-script:
@@ -21,3 +25,12 @@ jobs:
         # env:
         #   MI_API_KEY: ${{ secrets.MI_API_KEY }}
         run: python3 main.py
+
+      - name: Guardar cambios en el repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Actividades/
+          git diff --staged --quiet || git commit -m "chore: nueva actividad $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git pull --rebase
+          git push
